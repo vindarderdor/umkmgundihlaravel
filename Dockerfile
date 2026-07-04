@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 # Set document root ke folder public Laravel
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
@@ -8,19 +8,21 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Aktifkan mod_rewrite untuk Laravel
 RUN a2enmod rewrite
 
-# Install dependensi yang dibutuhkan (termasuk PostgreSQL untuk Supabase)
+# Install dependensi yang dibutuhkan (termasuk PostgreSQL untuk Supabase dan libicu-dev untuk intl)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libicu-dev \
     unzip \
     git \
     nodejs \
     npm \
     libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd zip pdo pdo_mysql pdo_pgsql
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install gd zip pdo pdo_mysql pdo_pgsql intl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
